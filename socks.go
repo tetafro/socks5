@@ -36,6 +36,10 @@ func (s *Server) Serve(l net.Listener) error {
 		if s.counter%logFreq == 0 {
 			log.Printf("Served %d requests", s.counter)
 		}
-		go s.origin.ServeConn(conn)
+		go func() {
+			if err := s.origin.ServeConn(conn); err != nil {
+				log.Printf("Failed to serve connection: %v", err)
+			}
+		}()
 	}
 }
