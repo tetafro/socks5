@@ -1,0 +1,3 @@
+run:
+  concurrency: 2
+  deadline: 3m

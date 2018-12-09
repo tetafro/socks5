@@ -1,5 +1,8 @@
 # SOCKS5 Proxy Server
 
+[![Go Report](https://goreportcard.com/badge/github.com/tetafro/socks5)](https://goreportcard.com/report/github.com/tetafro/socks5)
+[![Release](https://img.shields.io/github/tag/tetafro/socks5.svg)](https://github.com/tetafro/socks5/releases)
+
 SOCKS5 proxy server with password authentication. This is a simple wrapper
 around [go-socks5](https://github.com/armon/go-socks5) library.
 
