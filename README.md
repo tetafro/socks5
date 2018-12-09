@@ -21,7 +21,8 @@ socks5 -host 127.0.0.1 -port 8080 -user bob -password qwerty
 
 ## Run docker
 
-Get docker image and run proxy server in container on port 8088
+Get docker [image](https://hub.docker.com/r/tetafro/socks5/) and run proxy
+server in container on port 8088
 ```sh
 docker run -d -p 8088:1080 tetafro/socks5 \
     sh -c '/app/socks5 -username bob -password qwerty'
