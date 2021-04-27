@@ -1,6 +1,6 @@
 .PHONY: dep
 dep:
-	dep ensure -v
+	go mod tidy && go mod verify
 
 .PHONY: build
 build:
