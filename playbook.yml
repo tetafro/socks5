@@ -10,6 +10,7 @@
     container: socks5
     proxy_user: ''
     proxy_password: ''
+    proxy_port: 0
   tasks:
     - name: Pull latest image
       command: docker pull {{ image }}:{{ tag }}
