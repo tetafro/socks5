@@ -8,7 +8,7 @@
     image: ghcr.io/tetafro/socks5
     tag: latest
     container: socks5
-    user: ''
+    proxy_user: ''
     pass: ''
   tasks:
     - name: Pull latest image
@@ -38,5 +38,5 @@
         --restart unless-stopped
         --name {{ container }}
         {{ image }}:{{ tag }}
-        -username "{{ user }}" -password "{{ pass }}"
+        -username "{{ proxy_user }}" -password "{{ proxy_password }}"
       changed_when: true
