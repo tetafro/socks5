@@ -21,18 +21,19 @@ func main() {
 	port := flag.Int("port", defaultPort, "Port to listen")
 	flag.Parse()
 
-	if *username == "" && *password != "" || *username != "" && *password == "" {
+	var conf socks5.Config
+	switch {
+	case *username != "" && *password != "":
+		creds := map[string]string{*username: *password}
+		conf.Credentials = socks5.StaticCredentials(creds)
+	case *username == "" && *password == "":
+		log.Println("WARNING: Anonymous users are enabled")
+	default:
 		log.Println("Username and password must be either blank or both not blank")
 		os.Exit(1)
 	}
 
-	conf := &socks5.Config{}
-	if *username != "" && *password != "" {
-		creds := map[string]string{*username: *password}
-		conf.Credentials = socks5.StaticCredentials(creds)
-	}
-
-	socks, err := socks5.New(conf)
+	socks, err := socks5.New(&conf)
 	if err != nil {
 		log.Printf("Failed to make server: %v\n", err)
 		os.Exit(1)
