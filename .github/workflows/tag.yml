@@ -1,30 +1,99 @@
-name: Publish Docker image
+name: Build and deploy
 
 on:
   push:
     tags: ['*']
 
 jobs:
-  push:
+  lint-go:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.x
+
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.46
+
+  lint-ansible:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install linters
+        run: sudo apt install -y ansible ansible-lint yamllint
+
+      - name: Run yamllint
+        run: yamllint --format colored --strict ./playbook.yml
+
+      - name: Run ansible-lint
+        run: ansible-lint ./playbook.yml
+
+  build:
+    needs: [lint-go, lint-ansible]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Log in to the container registry
-        uses: docker/login-action@v2.0.0
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: tetafro
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3.0.0
+      - name: Build and push docker image
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: ghcr.io/tetafro/socks5:${{ github.ref_name }}
+          tags: ghcr.io/tetafro/socks5:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ansible
+        run: |
+          sudo apt-add-repository -y ppa:ansible/ansible
+          sudo apt update -y
+          sudo apt install -y ansible ansible-lint
+
+      - name: Setup ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 0600 ~/.ssh/id_ed25519
+
+      - name: Deploy new image
+        run: >
+          ansible-playbook
+          --private-key ~/.ssh/id_ed25519
+          --inventory '${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }},'
+          --user ${{ secrets.SSH_USER }}
+          --extra-vars "user=${{ PROXY_USER }} password=${{ PROXY_PASSWORD }}"
+          ./playbook.yml

@@ -1,0 +1,42 @@
+---
+# Ansible playbook for service deployment. Pulls the latest image from the
+# container registry, and replaces currently running container (if exists).
+- name: Setup
+  hosts: all
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    image: ghcr.io/tetafro/socks5
+    tag: latest
+    container: socks5
+    user: ''
+    pass: ''
+  tasks:
+    - name: Pull latest image
+      command: docker pull {{ image }}:{{ tag }}
+      changed_when: true
+
+    - name: Check if container is runnig
+      shell: docker ps | grep {{ container }}
+      register: container_running
+      changed_when: false
+      ignore_errors: true
+
+    - name: Stop current container
+      command: docker stop {{ container }}
+      changed_when: true
+      when: container_running.rc == 0
+
+    - name: Remove current container
+      command: docker rm {{ container }}
+      changed_when: true
+      when: container_running.rc == 0
+
+    - name: Run latest image
+      command: >
+        docker run --detach
+        --publish {{ proxy_port }}:1080
+        --restart unless-stopped
+        --name {{ container }}
+        {{ image }}:{{ tag }}
+        -username "{{ user }}" -password "{{ pass }}"
+      changed_when: true
