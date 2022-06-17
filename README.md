@@ -27,6 +27,6 @@ server in container on port 8088
 docker run --detach \
     --publish 8088:1080 \
     --name socks5 \
-    tetafro/socks5 \
+    ghcr.io/tetafro/socks5 \
     sh -c '/app/socks5 -username bob -password qwerty'
 ```

@@ -12,4 +12,4 @@ lint:
 
 .PHONY: docker
 docker:
-	docker build -t tetafro/socks5 .
+	docker build -t ghcr.io/tetafro/socks5 .
