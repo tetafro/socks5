@@ -1,13 +1,22 @@
-FROM golang:1.16-alpine3.13 AS build
+FROM golang:1.18-alpine3.16 AS build
 
-WORKDIR /go/src/github.com/tetafro/socks5
+WORKDIR /build
 
 COPY . .
 RUN go build -o ./bin/socks5
 
-FROM alpine:3.13
+FROM alpine:3.16
 
-COPY --from=build /go/src/github.com/tetafro/socks5/bin/socks5 /app/
+WORKDIR /app
+
+COPY --from=build /build/bin/socks5 /app/
+
+RUN apk add --no-cache ca-certificates && \
+    addgroup -S -g 5000 socks5 && \
+    adduser -S -u 5000 -G socks5 socks5 && \
+    chown -R socks5:socks5 .
+
+USER socks5
 
 EXPOSE 1080
 
