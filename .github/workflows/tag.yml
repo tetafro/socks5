@@ -79,8 +79,8 @@ jobs:
       - name: Install ansible
         run: |
           sudo apt-add-repository -y ppa:ansible/ansible
-          sudo apt update -y
-          sudo apt install -y ansible ansible-lint
+          sudo apt update -y -q
+          sudo apt install -y -q ansible ansible-lint
 
       - name: Setup ssh
         run: |

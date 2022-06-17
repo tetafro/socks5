@@ -9,7 +9,7 @@
     tag: latest
     container: socks5
     proxy_user: ''
-    pass: ''
+    proxy_password: ''
   tasks:
     - name: Pull latest image
       command: docker pull {{ image }}:{{ tag }}
