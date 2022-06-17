@@ -17,19 +17,20 @@ const (
 func main() {
 	username := flag.String("username", "", "User login")
 	password := flag.String("password", "", "User password")
+	anon := flag.Bool("anon", false, "Anonymous proxy")
 	host := flag.String("host", defaultHost, "Host to listen")
 	port := flag.Int("port", defaultPort, "Port to listen")
 	flag.Parse()
 
 	var conf socks5.Config
 	switch {
+	case *anon:
+		log.Println("WARNING: Running in anonymous mode")
 	case *username != "" && *password != "":
 		creds := map[string]string{*username: *password}
 		conf.Credentials = socks5.StaticCredentials(creds)
-	case *username == "" && *password == "":
-		log.Println("WARNING: Anonymous users are enabled")
 	default:
-		log.Println("Username and password must be either blank or both not blank")
+		log.Println("Username and password must not be blank")
 		os.Exit(1)
 	}
 
