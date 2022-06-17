@@ -95,5 +95,5 @@ jobs:
           --private-key ~/.ssh/id_ed25519
           --inventory '${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }},'
           --user ${{ secrets.SSH_USER }}
-          --extra-vars "user=${{ PROXY_USER }} pass=${{ PROXY_PASSWORD }}"
+          --extra-vars "user=${{ secrets.PROXY_USER }} pass=${{ secrets.PROXY_PASSWORD }}"
           ./playbook.yml
