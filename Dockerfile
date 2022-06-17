@@ -20,4 +20,4 @@ USER socks5
 
 EXPOSE 1080
 
-CMD /app/socks5
+ENTRYPOINT ["/app/socks5"]
