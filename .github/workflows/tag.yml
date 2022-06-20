@@ -65,7 +65,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/tetafro/socks5:latest
+          tags: ghcr.io/tetafro/socks5:${{ github.ref_name }}, ghcr.io/tetafro/socks5:latest
 
   deploy:
     needs: build
