@@ -1,4 +1,4 @@
-name: Build and deploy
+name: Build and publish
 
 on:
   push:
@@ -66,37 +66,3 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/tetafro/socks5:${{ github.ref_name }}, ghcr.io/tetafro/socks5:latest
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install ansible
-        run: |
-          sudo apt-add-repository -y ppa:ansible/ansible
-          sudo apt update -y -q
-          sudo apt install -y -q ansible ansible-lint
-
-      - name: Setup ssh
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 0600 ~/.ssh/id_ed25519
-
-      - name: Deploy new image
-        run: >
-          ansible-playbook
-          --private-key ~/.ssh/id_ed25519
-          --inventory '${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }},'
-          --user ${{ secrets.SSH_USER }}
-          --extra-vars
-          "proxy_user=${{ secrets.PROXY_USER }}
-          proxy_password=${{ secrets.PROXY_PASSWORD }}
-          proxy_port=${{ secrets.PROXY_PORT }}"
-          ./playbook.yml
