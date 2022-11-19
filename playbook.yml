@@ -36,7 +36,7 @@
       command: >
         docker run --detach
         --publish {{ proxy_port }}:1080
-        --restart unless-stopped
+        --restart always
         --name {{ container }}
         {{ image }}:{{ tag }}
         -username "{{ proxy_user }}" -password "{{ proxy_password }}"
