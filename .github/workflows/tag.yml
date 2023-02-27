@@ -5,7 +5,7 @@ on:
     tags: ['*']
 
 jobs:
-  lint-go:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,27 +22,8 @@ jobs:
         with:
           version: v1.46
 
-  lint-ansible:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install linters
-        run: sudo apt install -y ansible ansible-lint yamllint
-
-      - name: Run yamllint
-        run: yamllint --format colored --strict ./playbook.yml
-
-      - name: Run ansible-lint
-        run: ansible-lint ./playbook.yml
-
   build:
-    needs: [lint-go, lint-ansible]
+    needs: lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
