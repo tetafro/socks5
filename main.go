@@ -21,16 +21,30 @@ func main() {
 	host := flag.String("host", defaultHost, "Host to listen")
 	port := flag.Int("port", defaultPort, "Port to listen")
 	flag.Parse()
+	username := os.Getenv("USERNAME")
+	password := os.Getenv("PASSWORD")
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = defaultHost
+	}
+	port := defaultPort
+	if value := os.Getenv("PORT"); value != "" {
+		var err error
+		port, err = strconv.Atoi(value)
+		if err != nil {
+			log.Fatalf("Invalid PORT %q: %v", value, err)
+		}
+	}
 
 	var conf socks5.Config
 	switch {
-	case *anon:
+	case username == "":
 		log.Println("WARNING: Running in anonymous mode")
-	case *username != "" && *password != "":
-		creds := map[string]string{*username: *password}
+	case username != "" && password != "":
+		creds := map[string]string{username: password}
 		conf.Credentials = socks5.StaticCredentials(creds)
 	default:
-		log.Println("Username and password must not be blank")
+		log.Println("Password must not be blank when username is set")
 		os.Exit(1)
 	}
 

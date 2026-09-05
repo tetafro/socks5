@@ -11,12 +11,14 @@ around [go-socks5](https://github.com/armon/go-socks5) library.
 Build and run (server will listen on `0.0.0.0:1080` by default)
 ```sh
 go get -u github.com/tetafro/socks5
-socks5 -user bob -password qwerty
+USERNAME=bob PASSWORD=qwerty socks5
 ```
 
-You can also use `-host` and `-port` flags to bind the server to particular address.
+Use `HOST` and `PORT` to bind the server to a particular address.
 ```sh
-socks5 -host 127.0.0.1 -port 8080 -user bob -password qwerty
+HOST=127.0.0.1 PORT=8080 \
+USERNAME=bob PASSWORD=qwerty \
+socks5
 ```
 
 ## Run docker
@@ -27,6 +29,7 @@ server in container on port 8088
 docker run --detach \
     --publish 8088:1080 \
     --name socks5 \
-    ghcr.io/tetafro/socks5 \
-    sh -c '/app/socks5 -username bob -password qwerty'
+    --env USERNAME=bob \
+    --env PASSWORD=qwerty \
+    ghcr.io/tetafro/socks5
 ```
