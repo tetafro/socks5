@@ -9,9 +9,6 @@ import (
 	socks5 "github.com/armon/go-socks5"
 )
 
-// logFreq sets frequency of statistics output.
-const logFreq = 1000
-
 // Server is a wrapper around go-socks5, that counts incoming requests.
 type Server struct {
 	listener net.Listener
@@ -45,5 +42,5 @@ func (s *Server) ListenAndServe(ctx context.Context, network, addr string) error
 
 // Stop closes the listener and stops the server.
 func (s *Server) Stop() error {
-	return s.listener.Close()
+	return s.listener.Close() //nolint:wrapcheck
 }

@@ -56,6 +56,9 @@ linters:
           - noctx
       - path: main.go
         text: '`defer cancel\(\)` will not run'
+      - path: main.go
+        linters:
+          - cyclop
       - path: (.+)\.go$
         text: 'G404: Use of weak random number generator'
       - path: (.+)\.go$
