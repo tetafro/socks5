@@ -23,11 +23,9 @@ socks5
 
 ## Run docker
 
-Get docker [image](https://hub.docker.com/r/tetafro/socks5/) and run proxy
-server in container on port 8088
 ```sh
 docker run --detach \
-    --publish 8088:1080 \
+    --publish 1080:1080 \
     --name socks5 \
     --env USERNAME=bob \
     --env PASSWORD=qwerty \
