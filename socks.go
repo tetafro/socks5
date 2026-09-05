@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net"
 
@@ -12,29 +14,26 @@ const logFreq = 1000
 
 // Server is a wrapper around go-socks5, that counts incoming requests.
 type Server struct {
-	origin  *socks5.Server
-	counter int
+	listener net.Listener
+	origin   *socks5.Server
 }
 
 // ListenAndServe is used to create a listener and serve on it.
-func (s *Server) ListenAndServe(network, addr string) error {
-	l, err := net.Listen(network, addr)
+func (s *Server) ListenAndServe(ctx context.Context, network, addr string) error {
+	var lc net.ListenConfig
+	var err error
+	s.listener, err = lc.Listen(ctx, network, addr)
 	if err != nil {
-		return err
+		return fmt.Errorf("listen on %s: %w", addr, err)
 	}
-	return s.Serve(l)
-}
 
-// Serve is used to serve connections from a listener.
-func (s *Server) Serve(l net.Listener) error {
 	for {
-		conn, err := l.Accept()
+		conn, err := s.listener.Accept()
 		if err != nil {
-			return err
-		}
-		s.counter++
-		if s.counter%logFreq == 0 {
-			log.Printf("Served %d requests", s.counter)
+			if ctx.Err() != nil {
+				return nil
+			}
+			return fmt.Errorf("accept connection: %w", err)
 		}
 		go func() {
 			if err := s.origin.ServeConn(conn); err != nil {
@@ -42,4 +41,9 @@ func (s *Server) Serve(l net.Listener) error {
 			}
 		}()
 	}
+}
+
+// Stop closes the listener and stops the server.
+func (s *Server) Stop() error {
+	return s.listener.Close()
 }

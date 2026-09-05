@@ -1,10 +1,14 @@
+// socks5 is a SOCKS5 proxy server with password authentication.
 package main
 
 import (
-	"flag"
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
 
 	socks5 "github.com/armon/go-socks5"
 )
@@ -15,12 +19,13 @@ const (
 )
 
 func main() {
-	username := flag.String("username", "", "User login")
-	password := flag.String("password", "", "User password")
-	anon := flag.Bool("anon", false, "Anonymous proxy")
-	host := flag.String("host", defaultHost, "Host to listen")
-	port := flag.Int("port", defaultPort, "Port to listen")
-	flag.Parse()
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer cancel()
+
 	username := os.Getenv("USERNAME")
 	password := os.Getenv("PASSWORD")
 	host := os.Getenv("HOST")
@@ -50,16 +55,24 @@ func main() {
 
 	socks, err := socks5.New(&conf)
 	if err != nil {
-		log.Printf("Failed to make server: %v\n", err)
+		log.Printf("Failed to make server: %v", err)
 		os.Exit(1)
 	}
 
 	server := &Server{origin: socks}
-	addr := fmt.Sprintf("%s:%d", *host, *port)
+	addr := fmt.Sprintf("%s:%d", host, port)
+	go func() {
+		<-ctx.Done()
+		if err := server.Stop(); err != nil {
+			log.Printf("Failed to stop server: %v", err)
+			os.Exit(1)
+		}
+	}()
 
-	log.Printf("Listening on %s\n", addr)
-	if err := server.ListenAndServe("tcp", addr); err != nil {
-		log.Printf("Failed to start server: %v\n", err)
+	log.Printf("Listening on %s", addr)
+	if err := server.ListenAndServe(ctx, "tcp", addr); err != nil && ctx.Err() == nil {
+		log.Printf("Failed to start server: %v", err)
 		os.Exit(1)
 	}
+	log.Print("Shutdown gracefully")
 }
