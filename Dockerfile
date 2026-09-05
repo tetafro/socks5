@@ -1,11 +1,11 @@
-FROM golang:1.18-alpine3.16 AS build
+FROM golang:1.25-alpine3.21 AS build
 
 WORKDIR /build
 
 COPY . .
 RUN go build -o ./bin/socks5
 
-FROM alpine:3.16
+FROM alpine:3.21
 
 WORKDIR /app
 
